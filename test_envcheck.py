@@ -22,6 +22,18 @@ class ValidateTests(unittest.TestCase):
         self.assertIn("API_KEY", errors[0])
         self.assertIn("missing.env", errors[1])
 
+    def test_profile_adds_required_variables(self):
+        with patch.dict(os.environ, {}, clear=True):
+            errors = validate([], [], "production")
+        self.assertEqual(errors, [
+            "Missing environment variable: DATABASE_URL",
+            "Missing environment variable: SECRET_KEY",
+        ])
+
+    def test_profile_and_manual_requirements_can_pass(self):
+        with patch.dict(os.environ, {"CI": "true", "API_KEY": "secret"}, clear=True):
+            self.assertEqual(validate(["API_KEY"], [], "ci"), [])
+
 
 if __name__ == "__main__":
     unittest.main()
